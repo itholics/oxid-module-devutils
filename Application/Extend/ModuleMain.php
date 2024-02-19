@@ -27,6 +27,7 @@ use Symfony\Component\Console\Output\StreamOutput;
  *  ModuleMain controller extension for vt-DevUtils Module.
  *
  * @mixin \OxidEsales\Eshop\Application\Controller\Admin\ModuleList
+ * @deprecated not used
  */
 class ModuleMain extends ModuleMain_parent
 {

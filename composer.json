@@ -1,29 +1,30 @@
 {
-  "name": "vanilla-thunder/oxid-module-devutils",
-  "description": "developer utilities for OXID eShop",
+  "name": "ith_modules/moduleinternals",
+  "description": "Developer utils for OXID eShop v7 with Smarty template engine.",
   "type": "oxideshop-module",
   "homepage": "https://github.com/vanilla-thunder/oxid-module-devutils",
+  "version": "v1.0.0",
   "license": [
     "GPL-3.0"
   ],
   "authors": [
     {
-      "name": "Marat Bedoev",
-      "email": "hello@mb-dev.pro"
+      "name": "ITholics GmbH",
+      "email": "info@itholics.de"
     }
   ],
   "extra": {
     "oxideshop": {
-      "target-directory": "vt/DevUtils"
+      "target-directory": "ith_modules/moduleinternals"
     }
   },
   "require": {
-    "php": ">=7.2",
-    "oxid-esales/oxideshop-ce": "^v6.2"
+    "php": ">=8.1",
+    "oxid-esales/oxideshop-ce": "^v7.0.0"
   },
   "autoload": {
     "psr-4": {
-      "VanillaThunder\\": "../../../source/modules/vt"
+      "VanillaThunder\\DevUtils\\": "."
     }
   }
 }

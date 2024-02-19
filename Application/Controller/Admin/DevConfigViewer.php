@@ -15,12 +15,13 @@
 
 namespace VanillaThunder\DevUtils\Application\Controller\Admin;
 
-use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
-use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
+use OxidEsales\Eshop\Application\Controller\Admin\AdminController;
+use OxidEsales\Eshop\Core\Registry;
+use OxidEsales\Eshop\Core\Request;
 use PDO;
 use VanillaThunder\DevUtils\Application\Core\DevUtils;
 
-class DevConfigViewer extends \OxidEsales\Eshop\Application\Controller\Admin\AdminController
+class DevConfigViewer extends AdminController
 {
     protected $_sThisTemplate = 'devutils_configviewer.tpl';
 
@@ -38,9 +39,9 @@ class DevConfigViewer extends \OxidEsales\Eshop\Application\Controller\Admin\Adm
             ->select('OXMODULE, OXVARNAME, OXVARTYPE, OCTET_LENGTH(OXVARVALUE) as SIZE, OXTIMESTAMP')
             ->from('oxconfig')
             ->where('oxshopid = :shopId')
-            ->orderBy("OXMODULE, OXVARNAME")
+            ->orderBy('OXMODULE, OXVARNAME')
             ->setParameters([
-                'shopId' => \OxidEsales\Eshop\Core\Registry::getConfig()->getShopId()
+                'shopId' => Registry::getConfig()->getShopId(),
             ]);
 
         $blocksData = $queryBuilder->execute();
@@ -48,61 +49,69 @@ class DevConfigViewer extends \OxidEsales\Eshop\Application\Controller\Admin\Adm
 
         $aData = [];
         foreach ($blocksData as $row) {
-            $oxmodule = (!empty($row["OXMODULE"]) ? str_replace(["module:","theme:"],"",$row["OXMODULE"]) : "general");
-            if (!array_key_exists($oxmodule, $aData)) $aData[$oxmodule] = [];
+            $oxmodule = (!empty($row['OXMODULE']) ? str_replace(['module:', 'theme:'], '', $row['OXMODULE']) : 'general');
+            if (!array_key_exists($oxmodule, $aData)) {
+                $aData[$oxmodule] = [];
+            }
             $aData[$oxmodule][] = $row;
         }
 
         echo json_encode(['status' => 'ok', 'summary' => $aData]);
+
         exit;
     }
 
-    public function getConfigValue ()
+    public function getConfigValue()
     {
-        $config = \OxidEsales\EshopCommunity\Core\Registry::getConfig();
-        $request = oxNew(\OxidEsales\Eshop\Core\Request::class);
-        $oxvarname = $request->getRequestEscapedParameter("oxvarname");
-        $oxmodule = $request->getRequestEscapedParameter("oxmodule");
+        $config    = \OxidEsales\EshopCommunity\Core\Registry::getConfig();
+        $request   = oxNew(Request::class);
+        $oxvarname = $request->getRequestEscapedParameter('oxvarname');
+        $oxmodule  = $request->getRequestEscapedParameter('oxmodule');
 
-        //$value = \OxidEsales\EshopCommunity\Core\Registry::getConfig()->getConfigParam($oxvarname); // cant halndle multiple oxvarnames with same name but different oxmodule
+        // $value = \OxidEsales\EshopCommunity\Core\Registry::getConfig()->getConfigParam($oxvarname); // cant halndle multiple oxvarnames with same name but different oxmodule
 
         $queryBuilder = DevUtils::getQueryBuilder();
 
         $queryBuilder
-            ->select("OXVARTYPE", $config->getDecodeValueQuery() . " as OXVARVALUE")
+            ->select('OXVARTYPE', 'OXVARVALUE')
             ->from('oxconfig')
-            ->where("oxvarname = :oxvarname")
-            ->andWhere("oxmodule = :oxmodule")
+            ->where('oxvarname = :oxvarname')
+            ->andWhere('oxmodule = :oxmodule')
             ->andWhere('oxshopid = :oxshopid')
             ->setMaxResults(1)
             ->setParameters([
                 'oxvarname' => $oxvarname,
-                'oxmodule' => $oxmodule ?? "",
-                'oxshopid' => \OxidEsales\Eshop\Core\Registry::getConfig()->getShopId()
+                'oxmodule'  => $oxmodule ?? '',
+                'oxshopid'  => Registry::getConfig()->getShopId(),
             ]);
 
         $blocksData = $queryBuilder->execute();
         $blocksData = $blocksData->fetchAll();
 
-        $oxvartype = $blocksData[0]["OXVARTYPE"];
-        $oxvarvalue = $blocksData[0]["OXVARVALUE"];
-        $value = "";
+        $oxvartype  = $blocksData[0]['OXVARTYPE'];
+        $oxvarvalue = $blocksData[0]['OXVARVALUE'];
+        $value      = '';
 
         switch ($oxvartype) {
             case 'arr':
             case 'aarr':
                 $value = unserialize($oxvarvalue);
+
                 break;
+
             case 'bool':
-                $value = ($oxvarvalue == 'true' || $oxvarvalue == '1');
+                $value = ('true' == $oxvarvalue || '1' == $oxvarvalue);
+
                 break;
+
             default:
                 $value = $oxvarvalue;
+
                 break;
         }
 
         echo json_encode(['status' => 'ok', 'value' => $value]);
+
         exit;
     }
-
 }

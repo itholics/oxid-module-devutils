@@ -15,58 +15,62 @@
 
 namespace VanillaThunder\DevUtils\Application\Controller\Admin;
 
-class DevLogs extends \OxidEsales\Eshop\Application\Controller\Admin\AdminDetailsController
+use OxidEsales\Eshop\Application\Controller\Admin\AdminDetailsController;
+use OxidEsales\Eshop\Core\Registry;
+
+class DevLogs extends AdminDetailsController
 {
     protected $_sThisTemplate = 'devutils_logs.tpl';
 
-    //protected $_sSqlLog = null;
-    //protected $_sMailsLog = null;
+    // protected $_sSqlLog = null;
+    // protected $_sMailsLog = null;
 
     public function getOxidLog()
     {
-        $cfg          = \OxidEsales\Eshop\Core\Registry::getConfig();
+        $cfg          = Registry::getConfig();
         $sOxidLogPath = $cfg->getConfigParam('sShopDir') . 'log/oxideshop.log';
         if (!file_exists($sOxidLogPath) || !is_readable($sOxidLogPath)) {
-            die(json_encode(['status' => "oxideshop.log does not exist or is not readable"]));
+            exit(json_encode(['status' => 'oxideshop.log does not exist or is not readable']));
         }
 
         $sShopDir = str_replace('source/', '', $cfg->getConfigParam('sShopDir'));
 
-        $sData = file_get_contents($sOxidLogPath);
-        $pattern = "/\[((?>\d{4}-\d\d-\d\d|\d\d \w{3}) \d\d:\d\d:\d\d(?>\.\d{6} \d{4})?)\] /"; // ooof...
-        $aData = preg_split($pattern, $sData, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+        $sData   = file_get_contents($sOxidLogPath);
+        $pattern = '/\\[((?>\\d{4}-\\d\\d-\\d\\d|\\d\\d \\w{3}) \\d\\d:\\d\\d:\\d\\d(?>\\.\\d{6} \\d{4})?)\\] /'; // ooof...
+        $aData   = preg_split($pattern, $sData, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
 
         $aLog = [];
         foreach ($aData as $index => $value) {
-            //print($index % 2);
-            if ($index % 2 !== 0) {
+            // print($index % 2);
+            if (0 !== $index % 2) {
                 continue;
             }
 
-            $log = trim(str_replace(['\n',$sShopDir],['<br/>',''],$aData[$index+1]));
+            $log = trim(str_replace(['\n', $sShopDir], ['<br/>', ''], $aData[$index + 1]));
 
-            if($date = date_create_from_format('d M H:i:s.u Y',$value)) {
+            if ($date = date_create_from_format('d M H:i:s.u Y', $value)) {
                 // pokemon exception
                 $aLog[] = [
-                    'date' => date_format($date, "Y-m-d H:i:s"),
-                    'log' => $log
+                    'date' => date_format($date, 'Y-m-d H:i:s'),
+                    'log'  => $log,
                 ];
-            }
-            else {
+            } else {
                 // oxid exception
                 $stacktrace = false;
-                if(preg_match('/(\[stacktrace\].+)\\"\]/',$log,$matches)) {
+                if (preg_match('/(\[stacktrace\].+)\\"\]/', $log, $matches)) {
                     $stacktrace = $matches[1] ?? false;
-                    if($stacktrace) $log = str_replace($stacktrace,"", $log);
+                    if ($stacktrace) {
+                        $log = str_replace($stacktrace, '', $log);
+                    }
                 }
                 $aLog[] = [
-                    'date' => $value,
-                    'log' => str_replace('"] []','',$log),
-                    'stacktrace' => $stacktrace
+                    'date'       => $value,
+                    'log'        => str_replace('"] []', '', $log),
+                    'stacktrace' => $stacktrace,
                 ];
             }
-            //var_dump($value);
-            //print $value." > ".$date."<br/>";
+            // var_dump($value);
+            // print $value." > ".$date."<br/>";
         }
 
         /*
@@ -87,61 +91,72 @@ class DevLogs extends \OxidEsales\Eshop\Application\Controller\Admin\AdminDetail
         }
         */
 
-        //$time = filemtime($sExLog);
-        print json_encode(['status' => 'ok', 'log' => array_reverse($aLog)]);
+        // $time = filemtime($sExLog);
+        echo json_encode(['status' => 'ok', 'log' => array_reverse($aLog)]);
+
         exit;
     }
-    public function clearOxidLog() {
-        $sOxidLogPath = \OxidEsales\Eshop\Core\Registry::getConfig()->getConfigParam('sShopDir') . 'log/oxideshop.log';
+
+    public function clearOxidLog()
+    {
+        $sOxidLogPath = Registry::getConfig()->getConfigParam('sShopDir') . 'log/oxideshop.log';
         if (!file_exists($sOxidLogPath) || !is_readable($sOxidLogPath)) {
-            die(json_encode(['status' => "oxideshop.log does not exist or is not readable"]));
+            exit(json_encode(['status' => 'oxideshop.log does not exist or is not readable']));
         }
 
-        file_put_contents($sOxidLogPath,'');
-        die(json_encode(['status' => "ok"]));
+        file_put_contents($sOxidLogPath, '');
+
+        exit(json_encode(['status' => 'ok']));
     }
 
     public function getApacheLog()
     {
-        $sApacheLogPath = ini_get("error_log");
+        $sApacheLogPath = ini_get('error_log');
         if (!$sApacheLogPath || empty($sApacheLogPath)) {
-            die(json_encode(['status' => "apache log is disabled"]));
+            exit(json_encode(['status' => 'apache log is disabled']));
         }
         if (!file_exists($sApacheLogPath) || !is_readable($sApacheLogPath)) {
-            die(json_encode(['status' => "apache log file does not exist or is not readable"]));
+            exit(json_encode(['status' => 'apache log file does not exist or is not readable']));
         }
 
-        $cfg      = \OxidEsales\Eshop\Core\Registry::getConfig();
+        $cfg      = Registry::getConfig();
         $sShopDir = str_replace('source/', '', $cfg->getConfigParam('sShopDir'));
 
         $aData = file($sApacheLogPath);
-        //$aData = array_unique($aData);
+        // $aData = array_unique($aData);
         $aData = array_slice($aData, -1000);
-        $aData = str_replace($sShopDir, "", $aData);
+        $aData = str_replace($sShopDir, '', $aData);
 
         $aLog = [];
-        foreach($aData as $row) if (!preg_match('/\] PHP\s+(\d|Stack)/',$row)) $aLog[] = $row;
+        foreach ($aData as $row) {
+            if (!preg_match('/\] PHP\s+(\d|Stack)/', $row)) {
+                $aLog[] = $row;
+            }
+        }
 
         echo json_encode(['status' => 'ok', 'log' => \array_reverse($aLog)]);
+
         exit;
     }
-    public function clearApacheLog() {
 
-        $sApacheLogPath = ini_get("error_log");
+    public function clearApacheLog()
+    {
+        $sApacheLogPath = ini_get('error_log');
         if (!$sApacheLogPath || empty($sApacheLogPath)) {
-            die(json_encode(['status' => "apache log is disabled"]));
+            exit(json_encode(['status' => 'apache log is disabled']));
         }
         if (!file_exists($sApacheLogPath) || !is_readable($sApacheLogPath)) {
-            die(json_encode(['status' => "apache log file does not exist or is not readable"]));
+            exit(json_encode(['status' => 'apache log file does not exist or is not readable']));
         }
 
-        file_put_contents($sApacheLogPath,'');
-        die(json_encode(['status' => "ok"]));
+        file_put_contents($sApacheLogPath, '');
+
+        exit(json_encode(['status' => 'ok']));
     }
 
     protected function _getXdebugErrorLog($aData)
     {
-        $cfg  = oxRegistry::getConfig();
+        $cfg  = Registry::getConfig();
         $aLog = [];
 
         $i       = -1;
@@ -150,31 +165,31 @@ class DevLogs extends \OxidEsales\Eshop\Application\Controller\Admin\AdminDetail
             if ($i > 30) {
                 break;
             } // 30 lag entries are enough, i suppose
-            preg_match("/\[([^\]]*)\]/", $row, $date);
+            preg_match('/\\[([^\\]]*)\\]/', $row, $date);
 
             // stack trace
-            if ((preg_match("/\] PHP Stack trace/", $row) > 0 || preg_match("/\] PHP\s+\d/", $row) > 0) && $date[1] == $logdate) {
+            if ((preg_match('/\\] PHP Stack trace/', $row) > 0 || preg_match('/\\] PHP\\s+\\d/', $row) > 0) && $date[1] == $logdate) {
                 $aLog[$i]['stacktrace'][] = substr($row, strlen($date[0]));
             } else { // first log line
-                $i++;
+                ++$i;
                 $logdate = $date[1];
-                preg_match("/\] PHP\s(.*):/", $row, $type);
-                preg_match("/\sPHP.+\:\s+(.*)\sin\s/", $row, $header);
-                preg_match("/\sin\s\/(.*)/", $row, $in);
+                preg_match('/\\] PHP\\s(.*):/', $row, $type);
+                preg_match('/\\sPHP.+\\:\\s+(.*)\\sin\\s/', $row, $header);
+                preg_match('/\\sin\\s\\/(.*)/', $row, $in);
 
                 $aLog[$i] = [
-                    'date' => date_format(date_create($logdate), 'Y-m-d H:i:s'),
-                    'type' => $type[1],
-                    'header' => $header[1],
-                    'in' => str_replace($cfg->getConfigParam("sShopDir"), "", "/" . $in[1]),
+                    'date'       => date_format(date_create($logdate), 'Y-m-d H:i:s'),
+                    'type'       => $type[1],
+                    'header'     => $header[1],
+                    'in'         => str_replace($cfg->getConfigParam('sShopDir'), '', '/' . $in[1]),
                     'stacktrace' => [],
-                    'full' => $row
+                    'full'       => $row,
                 ];
             }
         }
         echo json_encode(array_reverse($aLog));
-        //echo print_r($aLog);
+
+        // echo print_r($aLog);
         exit;
     }
-
 }

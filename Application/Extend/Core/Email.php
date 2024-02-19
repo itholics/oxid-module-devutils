@@ -36,8 +36,11 @@ class Email extends Email_parent
 
     public function send()
     {
-        if ($this->isDebug()) return $this;
-        else return parent::send();
+        if ($this->isDebug()) {
+            return $this;
+        }
+
+        return parent::send();
         /*
         $encoder = oxRegistry::get("oxSeoEncoder");
         $sFile = $this->getSubject();
@@ -53,6 +56,7 @@ class Email extends Email_parent
     public function sendForgotPwdEmail($sEmailAddress, $sSubject = null)
     {
         $ret = parent::sendForgotPwdEmail($sEmailAddress, $sSubject);
+
         return ($this->isDebug()) ? $this : $ret;
     }
 }

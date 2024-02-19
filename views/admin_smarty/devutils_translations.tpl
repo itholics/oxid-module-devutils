@@ -1,7 +1,7 @@
 [{include file="devutils__header.tpl"}]
 <div class="progress" ng-show="loading > 0"><div class="indeterminate"></div></div>
 
-[{if $error}]<h1>[{$error|var_dump}]</h1>[{/if}]
+[{if $error}]<h1>[{$error|@var_dump}]</h1>[{/if}]
 
 <div class="fixed-action-btn">
     <a class="btn-floating waves-effect waves-light" title="neue Übersetzung hinzufügen" ng-click="newTranslation()">

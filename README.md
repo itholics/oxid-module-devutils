@@ -1,7 +1,7 @@
-# [vt] Dev Utils for OXID eShop v6.2
+# [ITholics](https://github.com/itholics/oxid-module-devutils) Development Utils for OXID eShop v7 with Smarty Template Engine
 
-### Current Version: v2.0.0-RC (release candidate)
-this version is the first updated version for OXID v6, it still might have some bugs.
+Fork and further development of the original module by [Vanilla Thunder](https://github.com/vanilla-thunder/oxid-module-devutils).
+
 
 ### Functions
 + clearing tmp in oxid admin
@@ -13,12 +13,8 @@ this version is the first updated version for OXID v6, it still might have some 
 + put template names in front of cache file names, so you could easily find them in tmp/smarty/ folder 
 
 ### Installation
-`composer require -n vanilla-thunder/oxid-module-devutils`
 
-### Old version for OXID v4 
-you can find the old module version for OXID versions before v6 here:  
-https://github.com/vanilla-thunder/oxid-module-devutils/tree/oxid-v4
+```sh
+composer require -n ith_modules/moduleinternals
+```
 
-### Detailed Information
-Full description of all functions can be found in the repository wiki:  
-https://github.com/vanilla-thunder/oxid-module-devutils/wiki

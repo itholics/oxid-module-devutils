@@ -14,18 +14,17 @@
  */
 
 $sLangName = 'Deutsch';
-$aLang = array(
-    'charset' => 'UTF-8',
-    'devlogs' => 'Logs',
-    'devmails' => 'E-Mails Preview',
-    'devmetadata' => 'Module Metadata',
+$aLang     = [
+    'charset'           => 'UTF-8',
+    'devlogs'           => 'Logs',
+    'devmails'          => 'E-Mails Preview',
+    'devmetadata'       => 'Module Metadata',
     'devmodulemetadata' => 'Metadata',
-    'devconfigviewer' => 'Config Viewer',
-    'devtranslations' => 'Übersetzungen',
+    'devconfigviewer'   => 'Config Viewer',
+    'devtranslations'   => 'Übersetzungen',
 
     'DEVUTILS_NO_ENTRIES' => 'Keine Einträge vorhanden',
-    'DEVUTILS_TPL_OK' => '<i class="material-icons tiny green-text tooltipped" data-position="right" data-tooltip="TPL Datei gefunden">check</i>',
-    'DEVUTILS_TPL_NF' => '<i class="material-icons tiny red-text tooltipped" data-position="right" data-tooltip="TPL Datei nicht gefunden">error</i>'
+    'DEVUTILS_TPL_OK'     => '<i class="material-icons tiny green-text tooltipped" data-position="right" data-tooltip="TPL Datei gefunden">check</i>',
+    'DEVUTILS_TPL_NF'     => '<i class="material-icons tiny red-text tooltipped" data-position="right" data-tooltip="TPL Datei nicht gefunden">error</i>',
 
-
-);
+];

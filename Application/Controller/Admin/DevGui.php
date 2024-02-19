@@ -15,22 +15,30 @@
 
 namespace VanillaThunder\DevUtils\Application\Controller\Admin;
 
-class DevGui extends \OxidEsales\Eshop\Application\Controller\Admin\AdminController
+use OxidEsales\Eshop\Application\Controller\Admin\AdminController;
+use VanillaThunder\DevUtils\Application\Core\DevUtils;
+
+class DevGui extends AdminController
 {
-    protected $_devUtils = null;
+    protected $_devUtils;
     protected $_sThisTemplate = 'devutils_gui.tpl';
 
     public function init()
     {
         parent::init();
-        if ($this->_devUtils === null) $this->_devUtils = new \VanillaThunder\DevUtils\Application\Core\DevUtils();
+        if (null === $this->_devUtils) {
+            $this->_devUtils = new DevUtils();
+        }
     }
 
     public function success($content, $time = false)
     {
         header('Content-Type: application/json; charset=UTF-8');
-        if ($time) header('Last-Modified: ' . date('r', $time));
+        if ($time) {
+            header('Last-Modified: ' . date('r', $time));
+        }
         echo json_encode($content);
+
         exit;
     }
 
@@ -38,26 +46,27 @@ class DevGui extends \OxidEsales\Eshop\Application\Controller\Admin\AdminControl
     {
         header('HTTP/1.1 500 It didnt work... ');
         header('Content-Type: application/json; charset=UTF-8');
-        die(json_encode(array('error' => $content)));
+
+        exit(json_encode(['error' => $content]));
     }
 
     public function clearTmp()
     {
-        die($this->_devUtils->clearTmp());
+        exit($this->_devUtils->clearTmp());
     }
 
     public function clearTpl()
     {
-        die($this->_devUtils->clearTpl());
+        exit($this->_devUtils->clearTpl());
     }
 
     public function updateViews()
     {
-        die($this->_devUtils->updateViews());
+        exit($this->_devUtils->updateViews());
     }
 
     public function keepalive()
     {
-        die("ok");
+        exit('ok');
     }
 }

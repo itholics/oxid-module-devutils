@@ -15,8 +15,6 @@
 
 namespace VanillaThunder\DevUtils\Application\Extend\Controller;
 
-use DemoModules\Multilang\Application\Model\MultilangModel;
-
 /**
  * Navigation Controller extension for vt-DevUtils Module.
  *
@@ -27,6 +25,7 @@ class NavigationController extends NavigationController_parent
     public function render()
     {
         $r = parent::render();
-        return ($r == "header.tpl") ? "vtdev_navigation_header.tpl" : $r;
+
+        return ('header.tpl' == $r) ? 'vtdev_navigation_header.tpl' : $r;
     }
 }

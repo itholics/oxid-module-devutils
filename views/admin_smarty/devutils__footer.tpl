@@ -1,10 +1,10 @@
 </div>
-[{oxscript include=$oViewConf->getModuleUrl("vt-devutils","out/js/jquery.min.js")}]
-[{oxscript include=$oViewConf->getModuleUrl("vt-devutils","out/js/angular.min.js")}]
-[{oxscript include=$oViewConf->getModuleUrl("vt-devutils","out/js/ZeroClipboard.min.js")}]
-[{oxscript include=$oViewConf->getModuleUrl("vt-devutils","out/js/ng-clip.min.js")}]
-[{oxscript include=$oViewConf->getModuleUrl("vt-devutils","out/js/ng-sortable.min.js")}]
-[{oxscript include=$oViewConf->getModuleUrl("vt-devutils","out/js/materialize.min.js")}]
+[{oxscript include=$oViewConf->getModuleUrl("ith_moduleinternals","out/js/jquery.min.js")}]
+[{oxscript include=$oViewConf->getModuleUrl("ith_moduleinternals","out/js/angular.min.js")}]
+[{oxscript include=$oViewConf->getModuleUrl("ith_moduleinternals","out/js/ZeroClipboard.min.js")}]
+[{oxscript include=$oViewConf->getModuleUrl("ith_moduleinternals","out/js/ng-clip.min.js")}]
+[{oxscript include=$oViewConf->getModuleUrl("ith_moduleinternals","out/js/ng-sortable.min.js")}]
+[{oxscript include=$oViewConf->getModuleUrl("ith_moduleinternals","out/js/materialize.min.js")}]
 [{ oxscript }]
 
 <script>
@@ -48,7 +48,7 @@
        })
        .config(['ngClipProvider', function (ngClipProvider)
        {
-           ngClipProvider.setPath('[{$oViewConf->getModuleUrl("vt-devutils","out/ZeroClipboard.swf")}]');
+           ngClipProvider.setPath('[{$oViewConf->getModuleUrl("ith_moduleinternals","out/ZeroClipboard.swf")}]');
        }])
        .controller('devCtrl', function ($scope, $http, $timeout)
        {

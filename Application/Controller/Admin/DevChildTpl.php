@@ -15,20 +15,24 @@
 
 namespace VanillaThunder\DevUtils\Application\Controller\Admin;
 
-class DevChildTpl extends \OxidEsales\Eshop\Application\Controller\Admin\AdminDetailsController
+use OxidEsales\Eshop\Application\Controller\Admin\AdminDetailsController;
+use OxidEsales\Eshop\Core\Registry;
+
+class DevChildTpl extends AdminDetailsController
 {
     protected $_sThisTemplate = 'devutils_chiltpl.tpl';
 
     public function getTemplateStructure()
     {
-        $oConfig = \OxidEsales\Eshop\Core\Registry::getConfig();
+        $oConfig = Registry::getConfig();
 
         $theme = $oConfig->getConfigParam('sTheme');
         var_dump($theme);
 
         var_dump($oConfig->getViewsDir(true));
         var_dump($oConfig->getViewsDir());
-        //$aChildTpl = scandir();
-        return ""; //$aChildTpl;
+
+        // $aChildTpl = scandir();
+        return ''; // $aChildTpl;
     }
 }

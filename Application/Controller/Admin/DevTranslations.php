@@ -15,124 +15,135 @@
 
 namespace VanillaThunder\DevUtils\Application\Controller\Admin;
 
-use OxidEsales\Eshop\Core\ConfigFile;
+use OxidEsales\Eshop\Application\Controller\Admin\AdminDetailsController;
 use OxidEsales\Eshop\Core\Registry;
-use OxidEsales\Eshop\Core\Utils;
-use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
-use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
-use OxidEsales\EshopCommunity\Internal\Framework\Module\Install\Service\ModuleInstallerInterface;
-use PDO;
 
-class DevTranslations extends \OxidEsales\Eshop\Application\Controller\Admin\AdminDetailsController
+class DevTranslations extends AdminDetailsController
 {
     protected $_sThisTemplate = 'devutils_translations.tpl';
 
+    public function render() {
+        
+        return parent::render();
+    }
+
     public function getAllTranslations()
     {
-        $oConfig = \OxidEsales\Eshop\Core\Registry::getConfig();
-        $oViewConf = $this->getViewConfig();
-        $iLang = $oViewConf->getActLanguageId();
-        $aLangFiles = \OxidEsales\Eshop\Core\Registry::getLang()->getAllLangFiles($iLang);
-        $sShopDir = $oConfig->getConfigParam('sShopDir');
+        $oConfig    = Registry::getConfig();
+        $oViewConf  = $this->getViewConfig();
+        $iLang      = $oViewConf->getActLanguageId();
+        $aLangFiles = Registry::getLang()->getAllLangFiles($iLang);
+        $sShopDir   = $oConfig->getConfigParam('sShopDir');
 
         $aAllTranslations = [];
 
         foreach ($aLangFiles as $sLangFile) {
-            if (!file_exists($sLangFile)) continue;
+            if (!file_exists($sLangFile)) {
+                continue;
+            }
 
             $aLang = [];
+
             include $sLangFile;
             foreach ($aLang as $key => $value) {
-                if (!array_key_exists($key, $aAllTranslations)) $aAllTranslations[$key] = [];
-                $aAllTranslations[$key][str_replace($sShopDir, "", $sLangFile)] = $value;
+                if (!array_key_exists($key, $aAllTranslations)) {
+                    $aAllTranslations[$key] = [];
+                }
+                $aAllTranslations[$key][str_replace($sShopDir, '', $sLangFile)] = $value;
             }
         }
 
-        unset($aAllTranslations["charset"]);
+        unset($aAllTranslations['charset']);
         ksort($aAllTranslations);
 
-        print json_encode(["status" => "ok", "data" => $aAllTranslations]);
+        echo json_encode(['status' => 'ok', 'data' => $aAllTranslations]);
+
         exit;
     }
 
     public function getTranslations()
     {
         $oViewConf = $this->getViewConfig();
-        $iLang = $oViewConf->getActLanguageId();
-        $aLang = \OxidEsales\Eshop\Core\Registry::getLang()->getTranslationsArray($iLang, false);
+        $iLang     = $oViewConf->getActLanguageId();
+        $aLang     = Registry::getLang()->getTranslationsArray($iLang, false);
 
-        unset($aLang["charset"]);
+        unset($aLang['charset']);
         ksort($aLang);
 
         $aTranslations = [];
-        foreach ($aLang as $key => $value) $aTranslations[] = ["key" => $key, "value" => $value];
+        foreach ($aLang as $key => $value) {
+            $aTranslations[] = ['key' => $key, 'value' => $value];
+        }
 
-        print json_encode(["status" => "ok", "data" => $aTranslations]);
+        echo json_encode(['status' => 'ok', 'data' => $aTranslations]);
+
         exit;
     }
 
     public function saveCustomTranslation()
     {
-        $oConfig = \OxidEsales\Eshop\Core\Registry::getConfig();
-        $oViewConf = $this->getViewConfig();
-        $iLang = $oViewConf->getActLanguageId();
-        $sCutLangFile = \OxidEsales\Eshop\Core\Registry::getLang()->getFrontendCustLangFilePath($iLang);
+        $oConfig      = Registry::getConfig();
+        $oViewConf    = $this->getViewConfig();
+        $iLang        = $oViewConf->getActLanguageId();
+        $sCutLangFile = Registry::getLang()->getFrontendCustLangFilePath($iLang);
 
         $aLang = [];
-        if (file_exists($sCutLangFile)) include($sCutLangFile);
+        if (file_exists($sCutLangFile)) {
+            include $sCutLangFile;
+        }
 
-
-        $aPayload = json_decode(file_get_contents('php://input'), true);
-        $sKey = $aPayload["key"];
-        $sTranslation = $aPayload["value"];
+        $aPayload     = json_decode(file_get_contents('php://input'), true);
+        $sKey         = $aPayload['key'];
+        $sTranslation = $aPayload['value'];
         $aLang[$sKey] = $sTranslation;
 
         $sCache = "<?php\n\$sLangName=\"Deutsch\";\n\$aLang = " . var_export($aLang, true) . ";\n?>";
 
         $blRes = file_put_contents($sCutLangFile, $sCache, LOCK_EX);
         if (!$blRes) {
-            print json_encode([
-                "status" => "error",
-                "msg" => "Datei " . str_replace($oConfig->getConfigParam("sShopDir"), "", $sCutLangFile) . " konnte nicht geschrieben werden, bitte lege diese manuell an und setze Schreibrechte."
+            echo json_encode([
+                'status' => 'error',
+                'msg'    => 'Datei ' . str_replace($oConfig->getConfigParam('sShopDir'), '', $sCutLangFile) . ' konnte nicht geschrieben werden, bitte lege diese manuell an und setze Schreibrechte.',
             ]);
         } else {
             $oUtils = Registry::getUtils();
             $oUtils->resetLanguageCache();
 
-            print json_encode(["status" => "ok"]);
+            echo json_encode(['status' => 'ok']);
         }
-        die();
+
+        exit;
     }
 
     public function deleteCustomTranslation()
     {
-        $oConfig = Registry::getConfig();
+        $oConfig  = Registry::getConfig();
         $sShopDir = $oConfig->getConfigParam('sShopDir');
 
-        $aPayload = json_decode(file_get_contents('php://input'), true);
-        $sCustLangFile = $aPayload["file"];
-        $aTranslation = $aPayload["translation"];
+        $aPayload      = json_decode(file_get_contents('php://input'), true);
+        $sCustLangFile = $aPayload['file'];
+        $aTranslation  = $aPayload['translation'];
 
         $aLang = [];
-        include($sShopDir . $sCustLangFile);
-        unset($aLang[$aTranslation["key"]]);
 
+        include $sShopDir . $sCustLangFile;
+        unset($aLang[$aTranslation['key']]);
 
         $sCache = "<?php\n\$sLangName=\"Deutsch\";\n\$aLang = " . var_export($aLang, true) . ";\n?>";
 
         $blRes = file_put_contents($sShopDir . $sCustLangFile, $sCache, LOCK_EX);
         if (!$blRes) {
-            print json_encode([
-                "status" => "error",
-                "msg" => "Datei " . $sCustLangFile . " konnte nicht geschrieben werden, bitte prüfe die Schreibrechte."
+            echo json_encode([
+                'status' => 'error',
+                'msg'    => 'Datei ' . $sCustLangFile . ' konnte nicht geschrieben werden, bitte prüfe die Schreibrechte.',
             ]);
         } else {
             $oUtils = Registry::getUtils();
             $oUtils->resetLanguageCache();
 
-            print json_encode(["status" => "ok"]);
+            echo json_encode(['status' => 'ok']);
         }
-        die();
-    }
 
+        exit;
+    }
 }

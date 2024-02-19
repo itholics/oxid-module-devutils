@@ -15,81 +15,73 @@
 
 namespace VanillaThunder\DevUtils\Application\Core;
 
+use Doctrine\DBAL\Query\QueryBuilder;
+use OxidEsales\Eshop\Core\DbMetaDataHandler;
+use OxidEsales\Eshop\Core\ShopVersion;
+use OxidEsales\EshopCommunity\Core\Config;
 use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
+use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
 
-class DevUtils extends \OxidEsales\EshopCommunity\Core\Config
+class DevUtils extends Config
 {
     public function clearTmp()
     {
-        $pattern = $this->getConfigParam("sCompileDir") . "/*.txt";
-        $i = 0;
-        $fs = 0;
+        $pattern = $this->getConfigParam('sCompileDir') . '/*.txt';
+        $i       = 0;
+        $fs      = 0;
         foreach (glob($pattern) as $item) {
             if (is_file($item)) {
                 $fs += filesize($item);
                 unlink($item);
-                $i++;
+                ++$i;
             }
         }
         $fs = number_format($fs / 1024 / 1024, 2);
 
-        return "$i files ($fs MB) deleted";
+        return "{$i} files ({$fs} MB) deleted";
     }
 
-    public function clearLangCacheOnly() {
-        $pattern = $this->getConfigParam("sCompileDir") . "/oxc_langcache_*.txt";
+    public function clearLangCacheOnly()
+    {
+        $pattern = $this->getConfigParam('sCompileDir') . '/oxc_langcache_*.txt';
         foreach (glob($pattern) as $item) {
             if (is_file($item)) {
                 $fs += filesize($item);
                 unlink($item);
-                $i++;
+                ++$i;
             }
         }
     }
 
     public function clearTpl()
     {
-        $pattern = $this->getConfigParam("sCompileDir") . "smarty/*.php";
-        $i = 0;
-        $fs = 0;
+        $pattern = $this->getConfigParam('sCompileDir') . 'smarty/*.php';
+        $i       = 0;
+        $fs      = 0;
         foreach (glob($pattern) as $item) {
             if (is_file($item)) {
                 $fs += filesize($item);
                 unlink($item);
-                $i++;
+                ++$i;
             }
         }
         $fs = number_format($fs / 1024 / 1024, 2);
 
-        return "$i files ($fs MB) deleted";
+        return "{$i} files ({$fs} MB) deleted";
     }
 
     public function updateViews()
     {
-        //if (oxRegistry::getSession()->getVariable("malladmin"))
-        $oMetaData = oxNew('oxDbMetaDataHandler');
-        $ret = $oMetaData->updateViews();
+        // if (oxRegistry::getSession()->getVariable("malladmin"))
+        $oMetaData = oxNew(DbMetaDataHandler::class);
 
-        return $ret;
+        return $oMetaData->updateViews();
     }
 
-    /**
-     * @return \Doctrine\DBAL\Query\QueryBuilder
-     */
-    public static function getQueryBuilder() {
-        $sShopVersion = \OxidEsales\Eshop\Core\ShopVersion::getVersion();
-
-        if ( version_compare($sShopVersion,"6.2.0") < 0) {
-            // < 6.2
-            return $queryBuilder = ContainerFactory::getInstance()->getContainer()
-                ->get(\OxidEsales\EshopCommunity\Internal\Common\Database\QueryBuilderFactoryInterface::class)
-                ->create();
-        } else {
-            // >= 6.2
-            return $queryBuilder = ContainerFactory::getInstance()->getContainer()
-                ->get(\OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface::class)
-                ->create();
-        }
+    public static function getQueryBuilder(): QueryBuilder
+    {
+        return ContainerFactory::getInstance()->getContainer()
+            ->get(QueryBuilderFactoryInterface::class)
+            ->create();
     }
-
 }

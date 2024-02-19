@@ -16,10 +16,14 @@
 namespace VanillaThunder\DevUtils\Application\Extend\Core;
 
 use OxidEsales\Eshop\Application\Model\Shop;
+use OxidEsales\Eshop\Core\ConfigFile;
+use OxidEsales\Eshop\Core\DatabaseProvider;
+use OxidEsales\Eshop\Core\Registry;
 
-class DbMetaDataHandler extends DbMetaDataHandler_parent {
+class DbMetaDataHandler extends DbMetaDataHandler_parent
+{
     /**
-     * Updates views only for active shops
+     * Updates views only for active shops.
      *
      * @param array $tables array of DB table name that can store different data per shop like oxArticle
      *
@@ -29,26 +33,27 @@ class DbMetaDataHandler extends DbMetaDataHandler_parent {
     {
         set_time_limit(0);
 
-        $db = \OxidEsales\Eshop\Core\DatabaseProvider::getDb();
-        $config = \OxidEsales\Eshop\Core\Registry::getConfig();
+        $db     = DatabaseProvider::getDb();
+        $config = Registry::getConfig();
 
-        $configFile = \OxidEsales\Eshop\Core\Registry::get(\OxidEsales\Eshop\Core\ConfigFile::class);
+        $configFile = Registry::get(ConfigFile::class);
 
         $originalSkipViewUsageStatus = $configFile->getVar('blSkipViewUsage');
-        $config->blSkipViewUsage = null;
+        $config->blSkipViewUsage     = null;
         $config->setConfigParam('blSkipViewUsage', 1);
 
         $this->safeGuardAdditionalMultiLanguageTables();
 
-        $shops = $db->getAll("select * from oxshops where oxactive = 1");
+        $shops = $db->getAll('select * from oxshops where oxactive = 1');
 
         $tables = $tables ? $tables : $config->getConfigParam('aMultiShopTables');
 
         $success = true;
         foreach ($shops as $shopValues) {
             $shopId = $shopValues[0];
+
             /** @var Shop $shop */
-            $shop = oxNew(\OxidEsales\Eshop\Application\Model\Shop::class);
+            $shop = oxNew(Shop::class);
             $shop->load($shopId);
             $shop->setMultiShopTables($tables);
             $mallInherit = [];
